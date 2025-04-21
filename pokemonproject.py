@@ -5,6 +5,7 @@ import pyttsx3
 import requests
 import json
 import os
+from bs4 import BeautifulSoup
 
 #Google voice to text to narrate
 voice = pyttsx3.init()
@@ -18,23 +19,28 @@ def delay_rint(s):
         sys.stdout.flush()
         time.sleep(0.05)
 
-#downloading and loading the full pokedex
-def get_pokemon_data(pokemon_id):
-    url = f"https://classic.pokepc.net/apps/pokedex/{pokemon_id}/"
-    respond  = requests.get(url)
-    if respond.status_code == 200:
-        data = respond.json()
-        return {
-            "id": data["id"].
-            "name": data["name"].capitalize(),
-            "types": [t["type"]["name"].capitalize() for t in data["types"]],
-            "stats": {stat["stat"]["name"]: stat["base_stat"] for stat in data["stats"]},
-            "abilities": [a["ability"]["name"] for a in data["abilities"]],
-            "height": data["height"],
-            "weight": data["weight"]
-        }
-    return None
+#scraping the website to access each section and full pokedex
+def scrape_pokedex(url="https://www.serebii.net/pokemon/nationalpokedex.shtml", filename="serebii_pokedex.json"):
+    if os.path.exists(filename):
+        print("Serebii Pokédex already scarped.")
+        return
+    headers = {"User-Agent": "Mozilla/5.0"}
+    response = request.get(url, headers = headers)
 
+if response.status_code != 200:
+    print("Failed to load Serebii page.")
+    return
+
+soup = BeautifulSoup(response.content, html.parser")
+table = soup.find("table", {"class": "dextable"})
+pokedex = []
+rows = table.find_all("tr")[2:] #skips headers
+    
+for r in rows:
+    colms = row.find_all("td")
+    if len(colms) < 6:
+        continue
+        
 
 class Pokemon:
     def __init__(self, name, types, moves, EVs, health):
